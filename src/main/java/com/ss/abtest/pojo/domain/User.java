@@ -1,4 +1,4 @@
-package com.ss.abtest.pojo;
+package com.ss.abtest.pojo.domain;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import java.util.Date;
 @Data
 public class User {
     private Long userId;
-    private String Name;
+    private String name;
     private Integer sex;
     private String email;
     private String password;

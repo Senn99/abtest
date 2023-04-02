@@ -1,7 +1,7 @@
 package com.ss.abtest.mapper;
 
 
-import com.ss.abtest.pojo.User;
+import com.ss.abtest.pojo.domain.User;
 import org.apache.ibatis.annotations.Mapper;
 
 @Mapper

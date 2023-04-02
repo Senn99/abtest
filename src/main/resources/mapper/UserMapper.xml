@@ -3,7 +3,7 @@
 <mapper namespace="com.ss.abtest.mapper.UserMapper">
 
 
-    <select id="getUserById" resultType="com.ss.abtest.pojo.User">
+    <select id="getUserById" resultType="com.ss.abtest.pojo.domain.User">
         select * from user where user_id = #{id};
     </select>
 </mapper>
