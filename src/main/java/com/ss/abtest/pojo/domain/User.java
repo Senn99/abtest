@@ -20,4 +20,8 @@ public class User {
     private Integer companyUserStatus;
     private Date createTime;
     private Date updateTime;
+
+    public Long getUser_id() {
+        return userId;
+    }
 }

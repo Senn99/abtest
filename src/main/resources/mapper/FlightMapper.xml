@@ -2,19 +2,61 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ss.abtest.mapper.FlightMapper">
 
-    <insert id="addFlight">
-
+    <insert id="addFlight" useGeneratedKeys="true" keyProperty="flightId" keyColumn="flight_id">
+        insert into flight(company_id, name, status, traffic, layer_id, filter, owner_id, create_time, update_time)
+        values (#{companyId}, #{name}, #{status}, #{traffic}, #{layerId}, #{filter}, #{ownerId}, #{createTime},
+                #{update_time})
     </insert>
-    <insert id="addVersion">
-
+    <insert id="addVersion" useGeneratedKeys="true" keyProperty="versionId" keyColumn="version_id">
+        insert into version(name, flight_id, config, create_time)
+        values (#{name}, #{flight_id}, #{config}, #{createTime})
     </insert>
     <insert id="addFlightTraffic">
-
+        insert into flight_traffic(flight_id, bucket, layer_id, create_time, update_time)
+        values (#{flight_id}, #{bucket}, #{layer_id}, #{createTime}, #{update_time})
     </insert>
     <insert id="addFlightUser">
-
+        insert into flight_user(flight_id, user_id, position, create_time, update_time)
+        values (#{flightId}, #{userId}, #{position}, #{createTime}, #{update_time})
     </insert>
     <select id="getLayerTraffic" resultType="java.lang.Integer">
+        select bucket
+        from flight_traffic
+        where layer_id = #{layerId}
+    </select>
+    <select id="listFlightByCompanyId" resultType="com.ss.abtest.pojo.domain.Flight">
+        select f.*
+        from company as c
+                 left join flight as f on c.company_id = f.company_id
+    </select>
+    <select id="getLayerById" resultType="com.ss.abtest.pojo.domain.Layer">
+        select *
+        from layer
+        where layer_id = #{id}
+    </select>
+    <select id="listFlightUserById" resultType="com.ss.abtest.pojo.vo.FlightUser">
+        SELECT fu.flight_id AS flight_id,
+               u.user_id    AS user_id,
+               u.NAME       AS NAME,
+               fu.position AS position
+        FROM
+            ( SELECT f.user_id AS user_id, f.flight_id AS flight_id, f.position as position FROM flight_user AS f WHERE f.flight_id = #{flightId} ) AS fu
+            LEFT JOIN USER AS u
+        ON fu.user_id = u.user_id;
 
+    </select>
+    <!--    <resultMap id="FlightUserMap" type="com.ss.abtest.pojo.vo.FlightUser">-->
+    <!--        <result column="flight_id" property="flightId"/>-->
+    <!--        <result column="position" property="position"/>-->
+    <!--        <association property="user">-->
+    <!--            <result column="user_id" property="userId"/>-->
+    <!--            <result column="name" property="name"/>-->
+    <!--        </association>-->
+    <!--    </resultMap>-->
+
+    <select id="getVersionByFlightId" resultType="com.ss.abtest.pojo.domain.Version">
+        select *
+        from version
+        where flight_id = #{id};
     </select>
 </mapper>

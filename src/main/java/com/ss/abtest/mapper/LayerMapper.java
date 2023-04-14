@@ -9,8 +9,8 @@ import org.apache.ibatis.annotations.Param;
  **/
 @Mapper
 public interface LayerMapper {
-    int updateLayerTraffic(int flightTraffic);
 
+    int updateLayerTraffic(int flightTraffic, long id);
 
     int getTraffic(@Param("id") Long id);
 }

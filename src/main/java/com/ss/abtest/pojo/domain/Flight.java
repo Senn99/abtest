@@ -2,7 +2,9 @@ package com.ss.abtest.pojo.domain;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 /**
  * @author senn
  * @since 2023/4/2 19:50
@@ -10,12 +12,23 @@ import java.util.Date;
 @Data
 public class Flight {
     private Long flightId;
+    private Long ownerId;
     private Long companyId;
     private String name;
-    private Integer Status;
+    private Integer status;
     private Integer traffic;
     private Long layerId;
     private String filter;
-    private Date createTime;
-    private Date updateTime;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
+
+    public String getCreate_time() {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return  dateTimeFormatter.format(createTime);
+    }
+
+    public String getUpdate_time() {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return  dateTimeFormatter.format(updateTime);
+    }
 }

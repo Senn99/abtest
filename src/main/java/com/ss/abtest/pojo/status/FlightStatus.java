@@ -16,4 +16,16 @@ public enum FlightStatus {
     public int getValue(){
         return this.value;
     }
+    public static FlightStatus getStatus(int status){
+        switch (status) {
+            case 0:
+                return CREATED;
+            case 1:
+                return NORMAL;
+            case 2:
+                return PAUSED;
+            default:
+                return null;
+        }
+    }
 }

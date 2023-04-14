@@ -1,5 +1,6 @@
 package com.ss.abtest.pojo;
 
+import com.ss.abtest.util.JsonUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -41,8 +42,8 @@ public class RequestResult {
      *
      * @return 200 OK
      */
-    public static RequestResult successResult(Object obj) {
-        return new RequestResult(HttpStatus.OK, obj);
+    public static String successResult(Object obj) {
+        return JsonUtil.parse(new RequestResult(HttpStatus.OK, obj));
     }
 
     /**
@@ -50,8 +51,8 @@ public class RequestResult {
      *
      * @return 400
      */
-    public static RequestResult requestErrorResult(Object obj) {
-        return new RequestResult(HttpStatus.INTERNAL_SERVER_ERROR, obj);
+    public static String requestErrorResult(Object obj) {
+        return JsonUtil.parse(new RequestResult(HttpStatus.BAD_REQUEST, obj));
     }
 
     /**
@@ -59,8 +60,8 @@ public class RequestResult {
      *
      * @return 400
      */
-    public static RequestResult requestErrorResult() {
-        return new RequestResult(HttpStatus.BAD_REQUEST, null);
+    public static String requestErrorResult() {
+        return  JsonUtil.parse(new RequestResult(HttpStatus.BAD_REQUEST, null));
     }
 
     /**
@@ -68,8 +69,8 @@ public class RequestResult {
      *
      * @return 500
      */
-    public static RequestResult errorResult() {
-        return new RequestResult(HttpStatus.INTERNAL_SERVER_ERROR, null);
+    public static String errorResult() {
+        return  JsonUtil.parse(new RequestResult(HttpStatus.INTERNAL_SERVER_ERROR, null));
     }
 
     /**
@@ -77,7 +78,7 @@ public class RequestResult {
      *
      * @return 500
      */
-    public static RequestResult errorResult(Object obj) {
-        return new RequestResult(HttpStatus.INTERNAL_SERVER_ERROR, obj);
+    public static String errorResult(Object obj) {
+        return  JsonUtil.parse(new RequestResult(HttpStatus.INTERNAL_SERVER_ERROR, obj));
     }
 }

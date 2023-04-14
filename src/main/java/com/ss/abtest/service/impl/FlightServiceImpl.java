@@ -4,8 +4,11 @@ import com.ss.abtest.exception.IllegalParamException;
 import com.ss.abtest.mapper.FlightMapper;
 import com.ss.abtest.mapper.LayerMapper;
 import com.ss.abtest.pojo.domain.Flight;
+import com.ss.abtest.pojo.domain.Layer;
 import com.ss.abtest.pojo.domain.Version;
 import com.ss.abtest.pojo.dto.FlightDto;
+import com.ss.abtest.pojo.status.FlightStatus;
+import com.ss.abtest.pojo.status.Position;
 import com.ss.abtest.pojo.vo.Bucket;
 import com.ss.abtest.pojo.vo.FlightUser;
 import com.ss.abtest.service.FlightService;
@@ -16,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Consumer;
 
 @Service
 public class FlightServiceImpl implements FlightService {
@@ -43,6 +47,39 @@ public class FlightServiceImpl implements FlightService {
         return flightDto;
     }
 
+    @Override
+    public List<FlightDto> listFlightByCompanyId(long companyId) {
+        List<Flight> flights = flightMapper.listFlightByCompanyId(companyId);
+        List<FlightDto> flightDtoList = new ArrayList<>();
+        for (Flight flight : flights) {
+            FlightDto flightDto = new FlightDto();
+            flightDto.setFlight(flight);
+            flightDto.setFlightId(flight.getFlightId());
+            flightDto.setStatus(FlightStatus.getStatus(flight.getStatus()));
+            Layer layer = flightMapper.getLayerById(flight.getLayerId());
+            flightDto.setLayer(layer);
+            List<FlightUser> users = flightMapper.listFlightUserById(flight.getFlightId());
+            addUserToFlight(flightDto, users);
+            List<Version> versions = flightMapper.getVersionByFlightId(flight.getLayerId());
+            flightDto.setVersions(versions);
+            flightDtoList.add(flightDto);
+        }
+        return flightDtoList;
+    }
+
+    private void addUserToFlight(FlightDto flightDto, List<FlightUser> list) {
+        if (list != null && !list.isEmpty()) {
+            for (FlightUser flightUser : list) {
+                if (flightUser.getPosition() == Position.CREATER.getValue()) {
+                    flightDto.setOwner(flightUser.getUser());
+                    list.remove(flightUser);
+                    break;
+                }
+            }
+            flightDto.setUsers(list);
+        }
+    }
+
     /**
      * 关联实验用户。
      *
@@ -66,7 +103,7 @@ public class FlightServiceImpl implements FlightService {
         // 3、数据库中创建数据
         buckets.forEach(bucket -> flightMapper.addFlightTraffic(bucket));
         // 4、更新实验层的剩余流量 LayerTraffic = LayerTraffic - FlightTraffic;
-        layerMapper.updateLayerTraffic(flightDto.getFlightTraffic());
+        layerMapper.updateLayerTraffic(flightDto.getFlightTraffic(), flightDto.getLayerId());
     }
 
     /**
@@ -84,7 +121,7 @@ public class FlightServiceImpl implements FlightService {
         List<Bucket> buckets = new ArrayList<>();
         int index = 0;
         int sum = 0;
-        for (int i = 0; i < 1000 && sum <= flightTraffic; i++) {
+        for (int i = 0; i < 1000 && sum < flightTraffic; i++) {
             if (index < list.size() && list.get(index) == i) {
                 index++;
             } else {
@@ -111,8 +148,7 @@ public class FlightServiceImpl implements FlightService {
     private void addFlightVersions(FlightDto flightDto) {
         List<Version> versions = flightDto.getVersionEntry();
         for (Version version : versions) {
-            Version v1 = flightMapper.addVersion(version);
-            version.setVersionId(v1.getVersionId());
+            flightMapper.addVersion(version);
         }
     }
 
@@ -122,8 +158,7 @@ public class FlightServiceImpl implements FlightService {
      * @param flightDto flightDto
      */
     private void addFlight(FlightDto flightDto) {
-        Flight flight = flightMapper.addFlight(flightDto.getFlightEntry());
-        flightDto.setFlightId(flight.getFlightId());
+        flightMapper.addFlight(flightDto.getFlightEntry());
     }
 
     /**

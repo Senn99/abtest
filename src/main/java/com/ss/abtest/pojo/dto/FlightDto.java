@@ -1,5 +1,6 @@
 package com.ss.abtest.pojo.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.ss.abtest.exception.IllegalParamException;
 import com.ss.abtest.pojo.domain.Flight;
 import com.ss.abtest.pojo.domain.Layer;
@@ -10,7 +11,9 @@ import com.ss.abtest.pojo.status.Position;
 import com.ss.abtest.pojo.vo.FlightUser;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -30,14 +33,27 @@ public class FlightDto {
     private List<Version> versions;
 
     public Flight getFlightEntry(){
-        getFlight().setStatus(getStatus().getValue());
-        return getFlight();
+        flight.setStatus(getStatus().getValue());
+        flight.setCreateTime(LocalDateTime.now());
+        flight.setUpdateTime(LocalDateTime.now());
+        flight.setOwnerId(owner.getUserId());
+        return flight;
+    }
+
+    public Long getFlightId() {
+        if (flightId == null) {
+            flightId = getFlight().getFlightId();
+        }
+        return flightId;
     }
 
     public List<Version> getVersionEntry(){
         getVersions().forEach(v -> {
             if (v.getFlightId() == null) {
                 v.setFlightId(getFlightId());
+            }
+            if (v.getCreateTime() == null) {
+                v.setCreateTime(LocalDateTime.now());
             }
         });
         return getVersions();
@@ -118,8 +134,8 @@ public class FlightDto {
         List<FlightUser> list = new ArrayList<>();
         FlightUser owner = new FlightUser();
         owner.setFlightId(getFlightId());
-        owner.setPosition(Position.CREATER);
-        owner.setUser(getOwner());
+        owner.setPosition(Position.CREATER.getValue());
+        owner.setUserId(getOwner().getUserId());
         list.add(owner);
         if (getUsers() != null && !getUsers().isEmpty()) {
             list.addAll(getUsers());

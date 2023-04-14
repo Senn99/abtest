@@ -4,4 +4,7 @@ import com.ss.abtest.pojo.domain.User;
 
 public interface UserService {
     User getUserById(long id);
+
+    User login(String email, String password);
+
 }
