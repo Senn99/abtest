@@ -1,9 +1,14 @@
 package com.ss.abtest.pojo.domain;
 
+import com.ss.abtest.util.JsonUtil;
 import lombok.Data;
+import org.apache.logging.log4j.util.Strings;
+import springfox.documentation.spring.web.json.Json;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author senn
@@ -30,5 +35,13 @@ public class Flight {
     public String getUpdate_time() {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return  dateTimeFormatter.format(updateTime);
+    }
+
+    public Map<String, String> getFilterMap() {
+        if (Strings.isEmpty(filter)) {
+            return new HashMap<>();
+        }
+
+        return JsonUtil.fromJson(filter, Map.class);
     }
 }

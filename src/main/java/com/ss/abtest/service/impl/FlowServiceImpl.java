@@ -5,10 +5,11 @@ import com.ss.abtest.pojo.domain.Version;
 import com.ss.abtest.pojo.flow.*;
 import com.ss.abtest.service.FlowService;
 import com.ss.abtest.service.flow.FlowDataContainer;
+import com.ss.abtest.util.JsonUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 /**
@@ -30,6 +31,7 @@ public class FlowServiceImpl implements FlowService {
 
     /**
      * 分流逻辑如下
+     *
      * @param request 请求
      * @return FlowResponse 分流响应
      */
@@ -37,32 +39,44 @@ public class FlowServiceImpl implements FlowService {
     public FlowResponse getFlightFlow(FlowRequest request) {
         // 1、参数验证。
         request.verifyParams();
-        //2、获取实验层。同一个token下可有多个实验层
-        List<FlowData> layerList = flowDataContainer.getLayer(request);
-        FlowResponse response = FlowResponse.nullResponse();
+        //2、获取实验层。根据token与分流单位获取实验层。
+        FlowData layer = flowDataContainer.getLayer(request);
+        if (layer == null) {
+            return FlowResponse.nullResponse("layer is null + request:" + JsonUtil.parse(request));
+        }
+        FlowResponse response = new FlowResponse();
         response.setFlowId(System.currentTimeMillis());
-        for (FlowData layer : layerList) {
-            //3、检查实验层上是否有测试用户
-            if (layer.isNeedTestUser()) {
-                // 判断  用户是否存在于测试用户
-                FlowResponse.nullResponse();
-                continue;
-            }
+        response.setRequest(request);
+        response.setCreateTime(LocalDateTime.now());
+        response.setCompanyId(layer.getCompanyId());
+        FlightVersion flightVersion;
+        //3、检查实验层上是否有测试用户
+        if (layer.isNeedTestUser() && layer.containTestUser(request)) {
+            String unitValue = request.getUnitValue();
+            flightVersion = layer.getTestUserFlight(unitValue);
+        } else {
             //4、流量分桶。
-            int bucket = flowBucket(request, layer);
+            int bucket = flowHash(request.getUnitValue(), layer.getLayerName(), UNIT_BUCKET_LENGTH);
             //5、检验对应桶是否存在实验
             if (!layer.checkBucketExist(bucket)) {
-                continue;
+                response.setMessage("bucket not exist.. there is no flight..");
+                return response;
             }
-            FlightVersion flightVersion = layer.getFlightVersion(bucket);
-            //5、检验过滤条件。
-            if (!matchFlightFiler(request, flightVersion)) {
-                continue;
-            }
-            //6、计算实验分组。
-            int group = flowVersion(request, flightVersion);
-            //7、设置此次命中实验配置。
-            Version version = flightVersion.getVersion(group);
+            flightVersion = layer.getFlightVersion(bucket);
+        }
+        if (flightVersion == null) {
+            return FlowResponse.nullResponse("flight is null. request: " + JsonUtil.parse(request));
+        }
+        //5、检验过滤条件。
+        if (!matchFlightFiler(request, flightVersion)) {
+            response.setMessage("flight filer is not match .. ");
+            return response;
+        }
+        //6、计算实验分组。
+        int group = flowHash(request.getUnitValue(), flightVersion.getFlightName(), flightVersion.getVersionSize());
+        //7、设置此次命中实验配置。
+        Version version = flightVersion.getVersion(group);
+        if (version != null) {
             response.addVersionConfig(version.getMapConfig());
             response.addVid(version.getVersionId());
         }
@@ -79,26 +93,15 @@ public class FlowServiceImpl implements FlowService {
     }
 
     /**
-     * 拼接流量分桶的hash key
-     * @param request 分流请求
-     * @param layer 实验层
-     * @return bucket 桶号
+     *
+     * @param content content
+     * @param target target
+     * @param length length
+     * @return hash
      */
-    private int flowBucket(FlowRequest request, FlowData layer) {
-        //1、拼接 hashKey;
-        String key = String.format(UNIT_KEY, request.getUnitValue(), layer.getLayerName());
-        return key.hashCode() % UNIT_BUCKET_LENGTH;
-    }
-
-    /**
-     * 拼接实验组分组的hash key
-     * @param request 分流请求
-     * @param flightVersion 实验组
-     * @return bucket 组号
-     */
-    private int flowVersion(FlowRequest request, FlightVersion flightVersion) {
-        //1、拼接 hashKey;
-        String key = String.format(UNIT_KEY, request.getUnitValue(), flightVersion.getFlightName());
-        return key.hashCode() % flightVersion.getVersionSize();
+    private int flowHash(String content, String target, int length) {
+        String key = String.format(UNIT_KEY, content, target);
+        int hash = key.hashCode() % length;
+        return hash < 0 ? -hash : hash;
     }
 }

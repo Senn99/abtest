@@ -4,8 +4,6 @@ import com.ss.abtest.pojo.RequestResult;
 import com.ss.abtest.pojo.domain.User;
 import com.ss.abtest.service.UserService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiModel;
-import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;

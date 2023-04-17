@@ -3,6 +3,23 @@
 <mapper namespace="com.ss.abtest.mapper.FlowMapper">
 
     <insert id="addFlowLog">
-
+        insert into flow_log(company_id, flow_id, vid_list, request, status, create_time)
+        values (#{companyId}, #{flowId}, #{vidList}, #{request}, 0, #{createTime})
     </insert>
+    <update id="updateLogStatus">
+        <foreach collection="list" item="item" separator=";">
+            update
+            flow_log
+            set
+            status = 1
+            where
+            id = #{item.id}
+        </foreach>
+    </update>
+    <select id="getFlowLog" resultType="com.ss.abtest.pojo.domain.FlowLog">
+        select *
+        from flow_log
+        where company_id = #{companyId}
+          and status = 0 limit #{size}
+    </select>
 </mapper>

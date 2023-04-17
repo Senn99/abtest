@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Map;
 
 @Service
 public class FlightServiceImpl implements FlightService {
@@ -35,6 +35,8 @@ public class FlightServiceImpl implements FlightService {
     public FlightDto createFlight(FlightDto flightDto) {
         //1、参数校验。
         verifyFlightParams(flightDto);
+        //2、配置校验。
+        verifyLayerConfig(flightDto);
         //2、数据库中创建实验
         addFlight(flightDto);
         //3、关联实验用户。
@@ -45,6 +47,28 @@ public class FlightServiceImpl implements FlightService {
         distributeTraffic(flightDto);
 
         return flightDto;
+    }
+
+    /**
+     * 不同层配置检查
+     */
+    private void verifyLayerConfig(FlightDto flightDto) {
+        List<Flight> flights = flightMapper.listFlight();
+        Map<String, String> map = flightDto.getFlight().getFilterMap();
+        for (Flight flight : flights) {
+            // 不同层之间要配置检查
+            if (!flight.getLayerId().equals(flightDto.getLayerId())) {
+                Map<String, String> filterMap = flight.getFilterMap();
+                if (filterMap.isEmpty()) {
+                    continue;
+                }
+                map.forEach((k, v) -> {
+                    if (filterMap.containsKey(k)) {
+                        throw new IllegalParamException("配置冲突... filter: " + k);
+                    }
+                });
+            }
+        }
     }
 
     @Override

@@ -17,4 +17,17 @@ public enum FlowUnit {
     public String getValue() {
         return this.value;
     }
+
+    public static FlowUnit getStatus(String status){
+        switch (status) {
+            case "uid":
+                return UID;
+            case "did":
+                return DID;
+            case "rid":
+                return RID;
+            default:
+                return null;
+        }
+    }
 }

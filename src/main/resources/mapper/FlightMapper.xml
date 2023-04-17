@@ -57,6 +57,21 @@
     <select id="getVersionByFlightId" resultType="com.ss.abtest.pojo.domain.Version">
         select *
         from version
-        where flight_id = #{id};
+        where flight_id = #{flightId};
+    </select>
+    <select id="listFlightTestUsers" resultType="com.ss.abtest.pojo.domain.FlightTestUser">
+        select ftu.*
+        from (select flight_id from flight where flight.layer_id = #{layerId} and flight.status = 1) as f
+                 left join flight_test_user as ftu on f.flight_id = ftu.flight_id;
+    </select>
+    <select id="getFlightById" resultType="com.ss.abtest.pojo.domain.Flight">
+        select *
+        from flight
+        where flight_id = #{flightId};
+    </select>
+    <select id="listFlight" resultType="com.ss.abtest.pojo.domain.Flight">
+        select *
+        from flight
+        where status in (0, 1, 2, 3)
     </select>
 </mapper>

@@ -15,7 +15,7 @@ import java.util.Map;
 @Data
 public class FlowRequest {
     private String token;
-    private FlowUnit flowUnit;
+    private String flowUnit;
     private String uid;
     private String did;
     private String rid;
@@ -24,11 +24,11 @@ public class FlowRequest {
 
     public String getUnitValue() {
         switch (flowUnit) {
-            case UID:
+            case "uid":
                 return uid;
-            case DID:
+            case "did":
                 return did;
-            case RID:
+            case "rid":
                 return rid;
             default:
                 return "";

@@ -1,13 +1,11 @@
 package com.ss.abtest.controller;
 
 import com.ss.abtest.pojo.RequestResult;
-import com.ss.abtest.pojo.domain.Flight;
 import com.ss.abtest.pojo.dto.FlightDto;
 import com.ss.abtest.service.FlightService;
 import com.ss.abtest.util.JsonUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

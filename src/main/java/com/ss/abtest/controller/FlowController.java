@@ -7,6 +7,7 @@ import com.ss.abtest.service.FlowService;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -21,7 +22,7 @@ public class FlowController {
     FlowService flowService;
 
     @GetMapping("/flow")
-    public String flow(FlowRequest request){
+    public String flow(@RequestBody FlowRequest request){
         FlowResponse flowResponse = flowService.getFlightFlow(request);
         return RequestResult.successResult(flowResponse);
     }

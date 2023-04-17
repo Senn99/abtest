@@ -1,12 +1,14 @@
 package com.ss.abtest.mapper;
 
 import com.ss.abtest.pojo.domain.Flight;
+import com.ss.abtest.pojo.domain.FlightTestUser;
 import com.ss.abtest.pojo.domain.Layer;
 import com.ss.abtest.pojo.domain.Version;
 import com.ss.abtest.pojo.dto.FlightDto;
 import com.ss.abtest.pojo.vo.Bucket;
 import com.ss.abtest.pojo.vo.FlightUser;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -33,5 +35,11 @@ public interface FlightMapper {
 
     List<FlightUser> listFlightUserById(long flightId);
 
-    List<Version> getVersionByFlightId(Long layerId);
+    List<Version> getVersionByFlightId(Long flightId);
+
+    List<FlightTestUser> listFlightTestUsers(long layerId);
+
+    Flight getFlightById(@Param("flightId") Long flightId);
+
+    List<Flight> listFlight();
 }

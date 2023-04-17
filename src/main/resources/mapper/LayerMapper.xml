@@ -8,4 +8,10 @@
     <select id="getTraffic" resultType="java.lang.Integer">
         select traffic from layer where layer_id = #{id}
     </select>
+    <select id="listLayer" resultType="com.ss.abtest.pojo.domain.Layer">
+        select * from layer
+    </select>
+    <select id="getFlightTraffic" resultType="com.ss.abtest.pojo.domain.FlightTraffic">
+        select * from flight_traffic where layer_id = #{layerId}
+    </select>
 </mapper>
