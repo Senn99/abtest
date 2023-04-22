@@ -8,7 +8,8 @@ public enum FlightStatus {
     CREATED(0),
     TEST(1),
     NORMAL(2),
-    PAUSED(3);
+    PAUSED(3),
+    END(4);
     int value;
 
     FlightStatus(int value) {

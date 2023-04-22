@@ -33,16 +33,6 @@ public class FlightUser {
         return flightId;
     }
 
-    public String getCreate_time() {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return  dateTimeFormatter.format(createTime);
-    }
-
-    public String getUpdate_time() {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        return  dateTimeFormatter.format(updateTime);
-    }
-
     public User getUser() {
         User user = new User();
         user.setUserId(userId);

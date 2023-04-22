@@ -21,4 +21,6 @@ public interface LayerMapper {
     List<Layer> listLayer();
 
     List<FlightTraffic> getFlightTraffic(@Param("layerId") Long layerId);
+
+    List<Layer> listLayerByCompanyId(@Param("companyId")long companyId);
 }

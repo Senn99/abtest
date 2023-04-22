@@ -33,8 +33,8 @@ public class RequestResult {
      *
      * @return 200 OK
      */
-    public static RequestResult successResult() {
-        return new RequestResult(HttpStatus.OK, null);
+    public static String successResult() {
+        return JsonUtil.parse(new RequestResult(HttpStatus.OK, null));
     }
 
     /**
@@ -55,6 +55,14 @@ public class RequestResult {
         return JsonUtil.parse(new RequestResult(HttpStatus.BAD_REQUEST, obj));
     }
 
+    /**
+     * 请求错误结果
+     *
+     * @return 400
+     */
+    public static String requestErrorResult(String message) {
+        return JsonUtil.parse(new RequestResult(HttpStatus.BAD_REQUEST, message, null));
+    }
     /**
      * 请求错误结果
      *

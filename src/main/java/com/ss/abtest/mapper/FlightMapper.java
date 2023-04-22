@@ -4,8 +4,8 @@ import com.ss.abtest.pojo.domain.Flight;
 import com.ss.abtest.pojo.domain.FlightTestUser;
 import com.ss.abtest.pojo.domain.Layer;
 import com.ss.abtest.pojo.domain.Version;
-import com.ss.abtest.pojo.dto.FlightDto;
 import com.ss.abtest.pojo.vo.Bucket;
+import com.ss.abtest.pojo.vo.FlightTable;
 import com.ss.abtest.pojo.vo.FlightUser;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -29,7 +29,7 @@ public interface FlightMapper {
 
     int addFlightUser(FlightUser flightUser);
 
-    List<Flight> listFlightByCompanyId(long companyId);
+    List<FlightTable> listFlightByCompanyId(long companyId, int page, int limit);
 
     Layer getLayerById(long id);
 
@@ -42,4 +42,18 @@ public interface FlightMapper {
     Flight getFlightById(@Param("flightId") Long flightId);
 
     List<Flight> listFlight();
+
+    int countFlightByCompanyId(long companyId);
+
+    List<FlightTestUser> listFlightTestUsersByFlightId(@Param("flightId")Long flightId);
+
+    List<Version> listVersionsByFlightId(@Param("flightId")Long flightId);
+
+    void addFlightTestUser(FlightTestUser testUser);
+
+    void editFlightStatus(long flight_id, int status);
+
+    void deleteFlightTraffic(long flight_id);
+
+    void updateLayerTraffic(@Param("layer_id") long layer_id, @Param("traffic") int traffic);
 }

@@ -14,4 +14,7 @@
     <select id="getFlightTraffic" resultType="com.ss.abtest.pojo.domain.FlightTraffic">
         select * from flight_traffic where layer_id = #{layerId}
     </select>
+    <select id="listLayerByCompanyId" resultType="com.ss.abtest.pojo.domain.Layer">
+        select * from layer where company_id = #{companyId}
+    </select>
 </mapper>

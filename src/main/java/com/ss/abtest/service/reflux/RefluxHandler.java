@@ -17,7 +17,7 @@ import java.util.List;
  * @author senn
  * @since 2023/4/17 16:29
  **/
-@Component
+//@Component
 public class RefluxHandler {
 
     @Autowired
@@ -27,7 +27,7 @@ public class RefluxHandler {
     FlowMapper flowMapper;
 
 
-    @Scheduled(fixedRate = 1 * 1000)
+//    @Scheduled(fixedRate = 1 * 1000)
     public void refluxTime() {
         System.out.println("周期回流任务..time: " + LocalDateTime.now());
         // 1、获取状态正常的接口

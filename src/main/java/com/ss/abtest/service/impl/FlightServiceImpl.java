@@ -3,13 +3,14 @@ package com.ss.abtest.service.impl;
 import com.ss.abtest.exception.IllegalParamException;
 import com.ss.abtest.mapper.FlightMapper;
 import com.ss.abtest.mapper.LayerMapper;
-import com.ss.abtest.pojo.domain.Flight;
-import com.ss.abtest.pojo.domain.Layer;
-import com.ss.abtest.pojo.domain.Version;
+import com.ss.abtest.mapper.UserMapper;
+import com.ss.abtest.pojo.domain.*;
 import com.ss.abtest.pojo.dto.FlightDto;
+import com.ss.abtest.pojo.dto.TableDto;
 import com.ss.abtest.pojo.status.FlightStatus;
 import com.ss.abtest.pojo.status.Position;
 import com.ss.abtest.pojo.vo.Bucket;
+import com.ss.abtest.pojo.vo.FlightTable;
 import com.ss.abtest.pojo.vo.FlightUser;
 import com.ss.abtest.service.FlightService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class FlightServiceImpl implements FlightService {
     FlightMapper flightMapper;
 
     @Autowired
+    UserMapper userMapper;
+
+    @Autowired
     LayerMapper layerMapper;
 
     @Transactional(rollbackFor = Exception.class)
@@ -41,12 +45,22 @@ public class FlightServiceImpl implements FlightService {
         addFlight(flightDto);
         //3、关联实验用户。
         addFlightUser(flightDto);
-        //4、数据库中创建实验组
+        //4、关联实验测试用户
+        addFlightTestUser(flightDto);
+        //5、数据库中创建实验组
         addFlightVersions(flightDto);
-        //5、分配流量
+        //6、分配流量
         distributeTraffic(flightDto);
 
         return flightDto;
+    }
+
+    /**
+     * 添加测试用户
+     */
+    private void addFlightTestUser(FlightDto flightDto) {
+        List<FlightTestUser> testUsers = flightDto.getTestUsers();
+        testUsers.forEach(ts -> flightMapper.addFlightTestUser(ts));
     }
 
     /**
@@ -72,23 +86,56 @@ public class FlightServiceImpl implements FlightService {
     }
 
     @Override
-    public List<FlightDto> listFlightByCompanyId(long companyId) {
-        List<Flight> flights = flightMapper.listFlightByCompanyId(companyId);
-        List<FlightDto> flightDtoList = new ArrayList<>();
-        for (Flight flight : flights) {
-            FlightDto flightDto = new FlightDto();
-            flightDto.setFlight(flight);
-            flightDto.setFlightId(flight.getFlightId());
-            flightDto.setStatus(FlightStatus.getStatus(flight.getStatus()));
-            Layer layer = flightMapper.getLayerById(flight.getLayerId());
-            flightDto.setLayer(layer);
-            List<FlightUser> users = flightMapper.listFlightUserById(flight.getFlightId());
-            addUserToFlight(flightDto, users);
-            List<Version> versions = flightMapper.getVersionByFlightId(flight.getLayerId());
-            flightDto.setVersions(versions);
-            flightDtoList.add(flightDto);
+    public TableDto<FlightTable> listFlightByCompanyId(long companyId, int page, int limit) {
+        List<FlightTable> flightTables = flightMapper.listFlightByCompanyId(companyId, (page - 1) * limit, limit);
+        int total = flightMapper.countFlightByCompanyId(companyId);
+        TableDto<FlightTable> flightTableDto = new TableDto<>();
+        flightTableDto.setList(flightTables);
+        flightTableDto.setTotal(total);
+        return flightTableDto;
+    }
+
+    @Override
+    public FlightDto getFlightById(String flight_id) {
+        Flight flight = flightMapper.getFlightById(Long.parseLong(flight_id));
+        FlightDto flightDto = new FlightDto();
+        Long flightId = flight.getFlightId();
+        flightDto.setFlight(flight);
+        flightDto.setFlightId(flightId);
+        Layer layer = flightMapper.getLayerById(flight.getLayerId());
+        flightDto.setLayer(layer);
+        User owner = userMapper.getUserById(flight.getOwnerId());
+        flightDto.setOwner(owner);
+        List<FlightUser> list = flightMapper.listFlightUserById(flightId);
+        flightDto.setUsers(list);
+        if (flight.getStatus() == FlightStatus.TEST.getValue()) {
+            List<FlightTestUser> testUsers = flightMapper.listFlightTestUsersByFlightId(flightId);
+            flightDto.setTestUsers(testUsers);
         }
-        return flightDtoList;
+        List<Version> versions = flightMapper.listVersionsByFlightId(flightId);
+        flightDto.setVersions(versions);
+        return flightDto;
+    }
+
+    @Override
+    public void editFlightStatus(long flight_id, FlightStatus status) {
+        flightMapper.editFlightStatus(flight_id, status.getValue());
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void endFlight(long flight_id) {
+        //1、更改实验状态
+        flightMapper.editFlightStatus(flight_id, FlightStatus.END.getValue());
+        //2、删除实验流量分配
+        flightMapper.deleteFlightTraffic(flight_id);
+        //3、更改实验层剩余流量
+        updateLayerTraffic(flight_id);
+    }
+
+    private void updateLayerTraffic(long flight_id) {
+        Flight flight = flightMapper.getFlightById(flight_id);
+        flightMapper.updateLayerTraffic(flight.getLayerId(), flight.getTraffic());
     }
 
     private void addUserToFlight(FlightDto flightDto, List<FlightUser> list) {
