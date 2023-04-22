@@ -4,4 +4,13 @@
     <select id="getUserById" resultType="com.ss.abtest.pojo.domain.User">
         select * from user where user_id = #{id};
     </select>
+    <select id="getUserByEmail" resultType="com.ss.abtest.pojo.domain.User">
+        select * from user where email = #{email};
+    </select>
+    <select id="listCompanyUsers" resultType="com.ss.abtest.pojo.domain.User">
+        select * from user where company_id = #{companyId} limit #{page}, #{limit}
+    </select>
+    <select id="countCompanyUsers" resultType="java.lang.Integer">
+        select count(1) from user where company_id = #{companyId}
+    </select>
 </mapper>

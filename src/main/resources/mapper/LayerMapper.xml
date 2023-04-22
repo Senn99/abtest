@@ -2,10 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.ss.abtest.mapper.LayerMapper">
     <update id="updateLayerTraffic">
-
+        update layer set traffic = traffic - #{flightTraffic} where layer_id = #{id}
     </update>
 
     <select id="getTraffic" resultType="java.lang.Integer">
-
+        select traffic from layer where layer_id = #{id}
+    </select>
+    <select id="listLayer" resultType="com.ss.abtest.pojo.domain.Layer">
+        select * from layer
+    </select>
+    <select id="getFlightTraffic" resultType="com.ss.abtest.pojo.domain.FlightTraffic">
+        select * from flight_traffic where layer_id = #{layerId}
+    </select>
+    <select id="listLayerByCompanyId" resultType="com.ss.abtest.pojo.domain.Layer">
+        select * from layer where company_id = #{companyId}
     </select>
 </mapper>

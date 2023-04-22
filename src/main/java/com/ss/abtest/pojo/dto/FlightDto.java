@@ -1,16 +1,16 @@
 package com.ss.abtest.pojo.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.ss.abtest.exception.IllegalParamException;
-import com.ss.abtest.pojo.domain.Flight;
-import com.ss.abtest.pojo.domain.Layer;
-import com.ss.abtest.pojo.domain.User;
-import com.ss.abtest.pojo.domain.Version;
+import com.ss.abtest.pojo.domain.*;
 import com.ss.abtest.pojo.status.FlightStatus;
 import com.ss.abtest.pojo.status.Position;
 import com.ss.abtest.pojo.vo.FlightUser;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -23,21 +23,44 @@ public class FlightDto {
     private Long flightId;
     private User owner;
     private List<FlightUser> users;
+    private List<FlightTestUser> testUsers;
     private Flight flight;
     private FlightStatus status;
     private Layer layer;
     private List<Integer> buckets;
     private List<Version> versions;
 
-    public Flight getFlightEntry(){
-        getFlight().setStatus(getStatus().getValue());
-        return getFlight();
+    public List<FlightTestUser> getTestUsers() {
+        if (testUsers == null) {
+            return new ArrayList<>();
+        }
+        Long flightId = getFlightId();
+        testUsers.forEach(s->s.setFlightId(flightId));
+        return testUsers;
     }
 
-    public List<Version> getVersionEntry(){
+    public Flight getFlightEntry() {
+        flight.setStatus(0);
+        flight.setCreateTime(LocalDateTime.now());
+        flight.setUpdateTime(LocalDateTime.now());
+        flight.setOwnerId(owner.getUserId());
+        return flight;
+    }
+
+    public Long getFlightId() {
+        if (flightId == null) {
+            flightId = getFlight().getFlightId();
+        }
+        return flightId;
+    }
+
+    public List<Version> getVersionEntry() {
         getVersions().forEach(v -> {
             if (v.getFlightId() == null) {
                 v.setFlightId(getFlightId());
+            }
+            if (v.getCreateTime() == null) {
+                v.setCreateTime(LocalDateTime.now());
             }
         });
         return getVersions();
@@ -74,25 +97,25 @@ public class FlightDto {
     }
 
     private void checkFlight() {
-        if(getFlight() == null) {
+        if (getFlight() == null) {
             throw new IllegalParamException("flight is null");
         }
-        if(getFlight().getFilter() == null) {
+        if (getFlight().getFilter() == null) {
             throw new IllegalParamException("flight filter is null");
         }
-        if(getFlight().getCompanyId() == null) {
+        if (getFlight().getCompanyId() == null) {
             throw new IllegalParamException("flight companyId is null");
         }
-        if(getFlight().getName() == null) {
+        if (getFlight().getName() == null) {
             throw new IllegalParamException("flight name is null");
         }
-        if(getFlight().getTraffic() == null) {
+        if (getFlight().getTraffic() == null) {
             throw new IllegalParamException("flight traffic is null");
         }
-        if(getFlight().getTraffic() < 0 || getFlight().getTraffic() > 100) {
+        if (getFlight().getTraffic() < 0 || getFlight().getTraffic() > 100) {
             throw new IllegalParamException("flight traffic error. traffic: " + getFlight().getTraffic());
         }
-        if (getStatus() != FlightStatus.CREATED) {
+        if (getFlight().getStatus() != FlightStatus.CREATED.getValue()) {
             throw new IllegalParamException("flight status error. status: " + getStatus());
         }
     }
@@ -118,11 +141,16 @@ public class FlightDto {
         List<FlightUser> list = new ArrayList<>();
         FlightUser owner = new FlightUser();
         owner.setFlightId(getFlightId());
-        owner.setPosition(Position.CREATER);
-        owner.setUser(getOwner());
+        owner.setPosition(Position.CREATER.getValue());
+        owner.setUserId(getOwner().getUserId());
         list.add(owner);
-        if (getUsers() != null && !getUsers().isEmpty()) {
-            list.addAll(getUsers());
+        List<FlightUser> users = getUsers();
+        if (users != null && !users.isEmpty()) {
+            Long flightId = getFlight().getFlightId();
+            for (FlightUser user : users) {
+                user.setFlightId(flightId);
+            }
+            list.addAll(users);
         }
         return list;
     }

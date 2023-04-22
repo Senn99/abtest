@@ -6,8 +6,10 @@ package com.ss.abtest.pojo.status;
  **/
 public enum FlightStatus {
     CREATED(0),
-    NORMAL(1),
-    PAUSED(2);
+    TEST(1),
+    NORMAL(2),
+    PAUSED(3),
+    END(4);
     int value;
 
     FlightStatus(int value) {
@@ -15,5 +17,19 @@ public enum FlightStatus {
     }
     public int getValue(){
         return this.value;
+    }
+    public static FlightStatus getStatus(int status){
+        switch (status) {
+            case 0:
+                return CREATED;
+            case 1:
+                return TEST;
+            case 2:
+                return NORMAL;
+            case 3:
+                return PAUSED;
+            default:
+                return null;
+        }
     }
 }

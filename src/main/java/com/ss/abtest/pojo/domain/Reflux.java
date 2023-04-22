@@ -13,6 +13,7 @@ public class Reflux {
     private Long companyId;
     private String url;
     private Integer tqs;
+    private Integer status;
     private Date createTime;
     private Date updateTime;
 }

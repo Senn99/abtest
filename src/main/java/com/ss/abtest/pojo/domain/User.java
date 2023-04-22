@@ -2,6 +2,7 @@ package com.ss.abtest.pojo.domain;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -18,6 +19,10 @@ public class User {
     private Integer status;
     private Long companyId;
     private Integer companyUserStatus;
-    private Date createTime;
-    private Date updateTime;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
+
+    public Long getUser_id() {
+        return userId;
+    }
 }
