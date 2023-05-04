@@ -22,4 +22,14 @@ public class ABTestExceptionHandler {
         System.out.println("请求参数异常 >>> : " + e);
         return RequestResult.requestErrorResult("请求参数异常,错误原因 >>> " + e.getMessage()) ;
     }
+
+    /**
+     * 参数异常
+     */
+    @ExceptionHandler(value = RuntimeException.class)
+    @ResponseBody
+    public String eRuntimeHandler(Exception e) {
+        System.out.println("请求异常 >>> : " + e.toString());
+        return RequestResult.requestErrorResult("请求异常,错误原因 >>> " + e.toString()) ;
+    }
 }

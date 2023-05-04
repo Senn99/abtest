@@ -2,6 +2,7 @@ package com.ss.abtest.pojo.domain;
 
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 /**
  * @author senn
@@ -14,6 +15,6 @@ public class Reflux {
     private String url;
     private Integer tqs;
     private Integer status;
-    private Date createTime;
-    private Date updateTime;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }

@@ -5,7 +5,7 @@ package com.ss.abtest.pojo.status;
  * @since 2023/4/2 19:50
  **/
 public enum Position {
-    CREATER(0),
+    CREATOR(0),
     NORMAL(2),
     ADMIN(3);
     int value;

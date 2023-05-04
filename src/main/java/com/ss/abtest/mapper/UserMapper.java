@@ -20,4 +20,6 @@ public interface UserMapper {
     List<User> listCompanyUsers(long companyId, int page, int limit);
 
     int countCompanyUsers(long companyId);
+
+    int addUser(User u);
 }

@@ -1,6 +1,5 @@
 package com.ss.abtest.pojo.dto;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.ss.abtest.exception.IllegalParamException;
 import com.ss.abtest.pojo.domain.*;
 import com.ss.abtest.pojo.status.FlightStatus;
@@ -10,9 +9,7 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.function.Consumer;
 
 /**
  * @author senn
@@ -141,7 +138,7 @@ public class FlightDto {
         List<FlightUser> list = new ArrayList<>();
         FlightUser owner = new FlightUser();
         owner.setFlightId(getFlightId());
-        owner.setPosition(Position.CREATER.getValue());
+        owner.setPosition(Position.CREATOR.getValue());
         owner.setUserId(getOwner().getUserId());
         list.add(owner);
         List<FlightUser> users = getUsers();

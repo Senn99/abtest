@@ -14,13 +14,17 @@ import java.util.Date;
  **/
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class Bucket {
     private Long flightId;
     private Long layerId;
     private Integer bucket;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
+
+    public Bucket() {
+        createTime = LocalDateTime.now();
+        updateTime = LocalDateTime.now();
+    }
 
     public Long getFlight_id() {
         return flightId;

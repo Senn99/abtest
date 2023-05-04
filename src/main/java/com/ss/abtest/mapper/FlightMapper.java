@@ -56,4 +56,10 @@ public interface FlightMapper {
     void deleteFlightTraffic(long flight_id);
 
     void updateLayerTraffic(@Param("layer_id") long layer_id, @Param("traffic") int traffic);
+
+    List<FlightTable> listFlightWithFilter(long companyId, String filter);
+
+    void updateLayerTest(Long layerId, int num);
+
+    void updateFlightTraffic(long flightId, int traffic);
 }

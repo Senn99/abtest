@@ -31,11 +31,11 @@ public class FlightVersion {
     public boolean checkFilter(Map<String, String> requestConfig) {
         for (Map.Entry<String, String> stringStringEntry : flightFilter.entrySet()) {
             String key = stringStringEntry.getKey();
-            String value = stringStringEntry.getValue();
+            String value = String.valueOf(stringStringEntry.getValue());
             if (!requestConfig.containsKey(key)) {
                 return false;
             }
-            String config = requestConfig.get(key);
+            String config = String.valueOf(requestConfig.get(key));
             if (!value.equals(config)) {
                 return false;
             }

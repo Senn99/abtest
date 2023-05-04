@@ -1,7 +1,10 @@
 package com.ss.abtest.controller;
 
 import com.ss.abtest.pojo.RequestResult;
+import com.ss.abtest.pojo.domain.Flight;
+import com.ss.abtest.pojo.domain.FlightTraffic;
 import com.ss.abtest.pojo.dto.FlightDto;
+import com.ss.abtest.pojo.dto.FlightTrafficDto;
 import com.ss.abtest.pojo.dto.TableDto;
 import com.ss.abtest.pojo.status.FlightStatus;
 import com.ss.abtest.pojo.vo.FlightTable;
@@ -9,6 +12,7 @@ import com.ss.abtest.service.FlightService;
 import com.ss.abtest.util.JsonUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +24,7 @@ import java.util.List;
  **/
 @Api(tags = "实验相关")
 @RestController
+@Log4j2
 public class FlightController {
 
     @Autowired
@@ -39,12 +44,14 @@ public class FlightController {
     }
 
     @GetMapping("/flight/query")
-    public String queryFlightWithFilter() {
-        return RequestResult.successResult();
+    public String queryFlightWithFilter(long companyId, String name, Integer status) {
+        TableDto<FlightTable> flightTableDto = flightService.listFlightWithFilter(companyId, name, status);
+        return RequestResult.successResult(flightTableDto);
     }
 
     @GetMapping("/flight")
     public String queryFlight(String flight_id) {
+        log.info("queryFlight # flight_id : {}", flight_id);
         FlightDto flight = flightService.getFlightById(flight_id);
         return RequestResult.successResult(flight);
     }
@@ -56,24 +63,35 @@ public class FlightController {
 //        return RequestResult.successResult(flightDto);
     }
 
+    @PostMapping("/flight/traffic")
+    public String updateFlightTraffic(@RequestBody FlightTrafficDto flightTrafficDto) {
+        boolean success = flightService.updateFlightTraffic(flightTrafficDto);
+        return RequestResult.successResult(success);
+    }
+
     @GetMapping("/flight/status/test")
     public String editFlightStatus2Test(long flight_id) {
-        flightService.editFlightStatus(flight_id, FlightStatus.TEST);
+        flightService.editFlightStatus2Test(flight_id);
         return RequestResult.successResult();
     }
+
     @GetMapping("/flight/status/run")
     public String editFlightStatus2Run(long flight_id) {
-        flightService.editFlightStatus(flight_id, FlightStatus.NORMAL);
+        flightService.editFlightStatus2Run(flight_id);
         return RequestResult.successResult();
     }
+
     @GetMapping("/flight/status/pause")
     public String editFlightStatus2Pause(long flight_id) {
-        flightService.editFlightStatus(flight_id, FlightStatus.PAUSED);
+        flightService.editFlightStatus2Pause(flight_id);
         return RequestResult.successResult();
     }
+
     @GetMapping("/flight/status/end")
     public String editFlightStatus2End(long flight_id) {
         flightService.endFlight(flight_id);
         return RequestResult.successResult();
     }
+
+
 }

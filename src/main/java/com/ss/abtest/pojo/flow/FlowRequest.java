@@ -2,6 +2,7 @@ package com.ss.abtest.pojo.flow;
 
 import com.ss.abtest.exception.IllegalParamException;
 import com.ss.abtest.pojo.status.FlowUnit;
+import com.ss.abtest.util.JsonUtil;
 import lombok.Data;
 import org.apache.logging.log4j.util.Strings;
 
@@ -19,7 +20,7 @@ public class FlowRequest {
     private String uid;
     private String did;
     private String rid;
-    private Map<String, String> requestConfig;
+    private String requestConfig;
     private Date createTime;
 
     public String getUnitValue() {
@@ -45,5 +46,9 @@ public class FlowRequest {
         if (uid == null && did == null && rid == null) {
             throw new IllegalParamException("flowUnit value is null uid:did:rid = " + uid + ":" + did + ":" + rid);
         }
+    }
+
+    public Map<String, String> getRequestConfig() {
+        return JsonUtil.fromJson(requestConfig, Map.class);
     }
 }

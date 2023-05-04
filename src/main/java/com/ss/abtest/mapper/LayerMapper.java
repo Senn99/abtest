@@ -23,4 +23,10 @@ public interface LayerMapper {
     List<FlightTraffic> getFlightTraffic(@Param("layerId") Long layerId);
 
     List<Layer> listLayerByCompanyId(@Param("companyId")long companyId);
+
+    Layer getLayerById(long layerId);
+
+    int deleteLayer(long layerId);
+
+    void deleteTrafficById(Long id);
 }

@@ -47,6 +47,15 @@ public class RequestResult {
     }
 
     /**
+     * 请求成功
+     *
+     * @return 200 OK
+     */
+    public static String successResult(String message, Object obj) {
+        return JsonUtil.parse(new RequestResult(HttpStatus.OK, message, obj));
+    }
+
+    /**
      * 请求错误结果
      *
      * @return 400
@@ -54,6 +63,9 @@ public class RequestResult {
     public static String requestErrorResult(Object obj) {
         return JsonUtil.parse(new RequestResult(HttpStatus.BAD_REQUEST, obj));
     }
+
+
+
 
     /**
      * 请求错误结果
@@ -63,13 +75,14 @@ public class RequestResult {
     public static String requestErrorResult(String message) {
         return JsonUtil.parse(new RequestResult(HttpStatus.BAD_REQUEST, message, null));
     }
+
     /**
      * 请求错误结果
      *
      * @return 400
      */
     public static String requestErrorResult() {
-        return  JsonUtil.parse(new RequestResult(HttpStatus.BAD_REQUEST, null));
+        return JsonUtil.parse(new RequestResult(HttpStatus.BAD_REQUEST, null));
     }
 
     /**
@@ -78,7 +91,7 @@ public class RequestResult {
      * @return 500
      */
     public static String errorResult() {
-        return  JsonUtil.parse(new RequestResult(HttpStatus.INTERNAL_SERVER_ERROR, null));
+        return JsonUtil.parse(new RequestResult(HttpStatus.INTERNAL_SERVER_ERROR, null));
     }
 
     /**
@@ -87,6 +100,6 @@ public class RequestResult {
      * @return 500
      */
     public static String errorResult(Object obj) {
-        return  JsonUtil.parse(new RequestResult(HttpStatus.INTERNAL_SERVER_ERROR, obj));
+        return JsonUtil.parse(new RequestResult(HttpStatus.INTERNAL_SERVER_ERROR, obj));
     }
 }

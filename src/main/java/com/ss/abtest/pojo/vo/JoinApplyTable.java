@@ -1,17 +1,19 @@
-package com.ss.abtest.pojo.domain;
+package com.ss.abtest.pojo.vo;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
-import java.util.Date;
+
 /**
  * @author senn
- * @since 2023/4/2 19:50
+ * @since 2023/4/24 20:36
  **/
 @Data
-public class Company {
+public class JoinApplyTable {
+    private Long joinApplyId;
+    private Long userId;
+    private String userName;
     private Long companyId;
-    private String name;
     private Integer status;
     private LocalDateTime createTime;
     private LocalDateTime updateTime;

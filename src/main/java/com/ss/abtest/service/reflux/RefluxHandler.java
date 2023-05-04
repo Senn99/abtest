@@ -6,6 +6,7 @@ import com.ss.abtest.pojo.domain.FlowLog;
 import com.ss.abtest.pojo.domain.Reflux;
 import com.ss.abtest.util.HttpUtil;
 import com.ss.abtest.util.JsonUtil;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,8 @@ import java.util.List;
  * @author senn
  * @since 2023/4/17 16:29
  **/
-//@Component
+@Component
+@Log4j2
 public class RefluxHandler {
 
     @Autowired
@@ -27,12 +29,13 @@ public class RefluxHandler {
     FlowMapper flowMapper;
 
 
-//    @Scheduled(fixedRate = 1 * 1000)
+    @Scheduled(fixedRate = 10 * 1000)
     public void refluxTime() {
-        System.out.println("周期回流任务..time: " + LocalDateTime.now());
+        log.info("周期回流任务..time: " + LocalDateTime.now());
         // 1、获取状态正常的接口
         List<Reflux> refluxInterface = refluxMapper.getRefluxInterface();
         if (refluxInterface == null || refluxInterface.isEmpty()) {
+            log.info("there is no refluxInterface in normal status");
             return;
         }
         // 2、遍历发送
@@ -44,6 +47,8 @@ public class RefluxHandler {
                 HttpUtil.postMethod(reflux.getUrl(), parse);
                 //4、更新日志状态
                 flowMapper.updateLogStatus(flowLog);
+            }else {
+                log.info("there is no log in reflux... {}", reflux);
             }
 
         }

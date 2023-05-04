@@ -4,6 +4,12 @@
     <update id="updateLayerTraffic">
         update layer set traffic = traffic - #{flightTraffic} where layer_id = #{id}
     </update>
+    <delete id="deleteLayer">
+        delete from layer where layer_id = #{layerId}
+    </delete>
+    <delete id="deleteTrafficById">
+        delete from flight_traffic where id = #{id}
+    </delete>
 
     <select id="getTraffic" resultType="java.lang.Integer">
         select traffic from layer where layer_id = #{id}
@@ -16,5 +22,8 @@
     </select>
     <select id="listLayerByCompanyId" resultType="com.ss.abtest.pojo.domain.Layer">
         select * from layer where company_id = #{companyId}
+    </select>
+    <select id="getLayerById" resultType="com.ss.abtest.pojo.domain.Layer">
+        select * from layer where layer_id = #{layerId}
     </select>
 </mapper>

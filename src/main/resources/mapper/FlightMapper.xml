@@ -24,13 +24,25 @@
         values (#{flightId}, #{flowContent}, #{createTime})
     </insert>
     <update id="editFlightStatus">
-        update flight set status = #{status} where flight_id = #{flight_id}
+        update flight
+        set status = #{status}
+        where flight_id = #{flight_id}
     </update>
     <update id="updateLayerTraffic">
-        update layer set traffic = traffic + #{traffic} where layer_id = #{layer_id}
+        update layer
+        set traffic = traffic + #{traffic}
+        where layer_id = #{layer_id}
+    </update>
+    <update id="updateLayerTest">
+        update layer set test = test + #{num} where layer_id = #{layerId}
+    </update>
+    <update id="updateFlightTraffic">
+        update flight set traffic = #{traffic} where flight_id = #{flightId}
     </update>
     <delete id="deleteFlightTraffic">
-        delete from flight_traffic where flight_id = #{flight_id}
+        delete
+        from flight_traffic
+        where flight_id = #{flight_id}
     </delete>
     <select id="getLayerTraffic" resultType="java.lang.Integer">
         select bucket
@@ -48,7 +60,8 @@
 
         FROM (SELECT * FROM flight WHERE company_id = #{companyId}) AS f
                  LEFT JOIN USER AS u ON f.owner_id = u.user_id
-        LIMIT #{page}, #{limit}
+            LIMIT #{page}
+           , #{limit}
     </select>
     <select id="getLayerById" resultType="com.ss.abtest.pojo.domain.Layer">
         select *
@@ -101,9 +114,28 @@
                  LEFT JOIN USER AS u ON f.owner_id = u.user_id
     </select>
     <select id="listFlightTestUsersByFlightId" resultType="com.ss.abtest.pojo.domain.FlightTestUser">
-        select * from flight_test_user where flight_id = #{flightId}
+        select *
+        from flight_test_user
+        where flight_id = #{flightId}
     </select>
     <select id="listVersionsByFlightId" resultType="com.ss.abtest.pojo.domain.Version">
-        select * from version where flight_id = #{flightId}
+        select *
+        from version
+        where flight_id = #{flightId}
+    </select>
+    <select id="listFlightWithFilter" resultType="com.ss.abtest.pojo.vo.FlightTable">
+        SELECT f.flight_id as flight_id,
+        u.name as owner_name,
+        f.company_id as company_id,
+        f.name as name,
+        f.status as status,
+        f.create_time as create_time,
+        f.update_time as update_time
+        FROM (SELECT * FROM flight WHERE company_id = #{companyId}
+        <if test="filter!=null">
+            ${filter}
+        </if>
+        ) AS f
+        LEFT JOIN USER AS u ON f.owner_id = u.user_id
     </select>
 </mapper>

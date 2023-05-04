@@ -6,6 +6,7 @@ import com.ss.abtest.mapper.LayerMapper;
 import com.ss.abtest.mapper.UserMapper;
 import com.ss.abtest.pojo.domain.*;
 import com.ss.abtest.pojo.dto.FlightDto;
+import com.ss.abtest.pojo.dto.FlightTrafficDto;
 import com.ss.abtest.pojo.dto.TableDto;
 import com.ss.abtest.pojo.status.FlightStatus;
 import com.ss.abtest.pojo.status.Position;
@@ -13,6 +14,8 @@ import com.ss.abtest.pojo.vo.Bucket;
 import com.ss.abtest.pojo.vo.FlightTable;
 import com.ss.abtest.pojo.vo.FlightUser;
 import com.ss.abtest.service.FlightService;
+import lombok.extern.log4j.Log4j2;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+@Log4j2
 @Service
 public class FlightServiceImpl implements FlightService {
 
@@ -117,9 +121,46 @@ public class FlightServiceImpl implements FlightService {
         return flightDto;
     }
 
-    @Override
+
     public void editFlightStatus(long flight_id, FlightStatus status) {
         flightMapper.editFlightStatus(flight_id, status.getValue());
+    }
+
+    @Transactional
+    @Override
+    public void editFlightStatus2Run(long flight_id) {
+        Flight flight = flightMapper.getFlightById(flight_id);
+        if (flight.getStatus() == FlightStatus.TEST.getValue() || flight.getStatus() == FlightStatus.PAUSED.getValue()) {
+            if (flight.getStatus() == FlightStatus.TEST.getValue()) {
+                flightMapper.updateLayerTest(flight.getLayerId(), -1);
+            }
+            editFlightStatus(flight_id, FlightStatus.NORMAL);
+        } else {
+            log.warn("editFlightStatus2Run # edit flight status error flight status : {}", FlightStatus.getStatus(flight.getStatus()));
+        }
+
+    }
+
+    @Override
+    public void editFlightStatus2Pause(long flight_id) {
+        Flight flight = flightMapper.getFlightById(flight_id);
+        if (flight.getStatus() == FlightStatus.CREATED.getValue()) {
+            log.warn("editFlightStatus2Pause # edit flight status error flight status : {}", FlightStatus.getStatus(flight.getStatus()));
+            return;
+        }
+        editFlightStatus(flight_id, FlightStatus.PAUSED);
+    }
+
+    @Transactional
+    @Override
+    public void editFlightStatus2Test(long flight_id) {
+        Flight flight = flightMapper.getFlightById(flight_id);
+        if (flight.getStatus() != FlightStatus.CREATED.getValue()) {
+            log.warn("editFlightStatus2Test # edit flight status error flight status : {}", FlightStatus.getStatus(flight.getStatus()));
+            return;
+        }
+        editFlightStatus(flight_id, FlightStatus.TEST);
+        flightMapper.updateLayerTest(flight.getLayerId(), 1);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -133,6 +174,77 @@ public class FlightServiceImpl implements FlightService {
         updateLayerTraffic(flight_id);
     }
 
+    @Override
+    public TableDto<FlightTable> listFlightWithFilter(long companyId, String name, Integer status) {
+        StringBuilder sb = new StringBuilder();
+        if (Strings.isNotEmpty(name)) {
+            sb.append(" and name like '%" + name + "%'");
+        }
+        if (status != null) {
+            sb.append(" and status = " + status);
+        }
+        log.info("FlightWithFilter : {}", sb.toString());
+        List<FlightTable> flightTables = flightMapper.listFlightWithFilter(companyId, sb.toString());
+        TableDto<FlightTable> flightTableDto = new TableDto<>();
+        flightTableDto.setList(flightTables);
+        return flightTableDto;
+    }
+
+    @Transactional
+    @Override
+    public boolean updateFlightTraffic(FlightTrafficDto flightTrafficDto) {
+        Long flightId = flightTrafficDto.getFlightId();
+        Long layerId = flightTrafficDto.getLayerId();
+        Integer newTraffic = flightTrafficDto.getTraffic();
+        log.info("updateFlightTraffic # flightId :{}, layerId: {}, traffic: {}", flightId, layerId, newTraffic);
+        Flight flightById = flightMapper.getFlightById(flightId);
+        Integer oldTraffic = flightById.getTraffic();
+        //相等则放弃
+        if (oldTraffic.equals(newTraffic)) {
+            return false;
+        }
+        Layer layer = layerMapper.getLayerById(flightById.getLayerId());
+        //判断剩余流量大小
+        if (newTraffic > oldTraffic && layer.getTraffic() < (newTraffic - oldTraffic)) {
+            return false;
+        }
+        List<FlightTraffic> flightTraffic = layerMapper.getFlightTraffic(layerId);
+        List<FlightTraffic> flightTrafficList = new ArrayList<>();
+        // 获取实验对应流量
+        flightTraffic.forEach(ft -> {
+            if (ft.getFlightId().equals(flightId)) {
+                flightTrafficList.add(ft);
+            }
+        });
+
+        if (newTraffic < oldTraffic) {
+            int sum = oldTraffic - newTraffic;
+            for (int i = 0; i < sum; i++) {
+                FlightTraffic ft = flightTrafficList.get(i);
+                layerMapper.deleteTrafficById(ft.getId());
+            }
+        } else {
+            int sum = newTraffic - oldTraffic;
+            int[] arr = new int[1000];
+            flightTraffic.forEach(ft -> arr[ft.getBucket()]++);
+            for (int i = 0; i < 1000 && sum > 0; i++) {
+                if (arr[i] == 0) {
+                    Bucket bucket = new Bucket();
+                    bucket.setFlightId(flightId);
+                    bucket.setLayerId(layerId);
+                    bucket.setBucket(i);
+                    flightMapper.addFlightTraffic(bucket);
+                    sum--;
+                }
+            }
+        }
+        //更新 实验 流量
+        flightMapper.updateFlightTraffic(flightId, newTraffic);
+        //更新 实验层 流量
+        flightMapper.updateLayerTraffic(layerId, oldTraffic - newTraffic);
+        return true;
+    }
+
     private void updateLayerTraffic(long flight_id) {
         Flight flight = flightMapper.getFlightById(flight_id);
         flightMapper.updateLayerTraffic(flight.getLayerId(), flight.getTraffic());
@@ -141,7 +253,7 @@ public class FlightServiceImpl implements FlightService {
     private void addUserToFlight(FlightDto flightDto, List<FlightUser> list) {
         if (list != null && !list.isEmpty()) {
             for (FlightUser flightUser : list) {
-                if (flightUser.getPosition() == Position.CREATER.getValue()) {
+                if (flightUser.getPosition() == Position.CREATOR.getValue()) {
                     flightDto.setOwner(flightUser.getUser());
                     list.remove(flightUser);
                     break;
