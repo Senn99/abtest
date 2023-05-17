@@ -33,7 +33,7 @@ public class FlowUpdateAdapter {
     @Autowired
     FlightMapper flightMapper;
 
-    @Scheduled(fixedRate = 60 * 1000)
+    @Scheduled(fixedRate = 10 * 1000)
     public void times() {
         System.out.println("周期任务，执行时刻：" + LocalDateTime.now());
         Map<String, Map<String, FlowData>> flowDataMap = new ConcurrentHashMap<>();

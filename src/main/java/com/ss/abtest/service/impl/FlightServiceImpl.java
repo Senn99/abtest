@@ -71,8 +71,11 @@ public class FlightServiceImpl implements FlightService {
      * 不同层配置检查
      */
     private void verifyLayerConfig(FlightDto flightDto) {
+        // 1、获取所有实验
         List<Flight> flights = flightMapper.listFlight();
+        // 2、获取当前新增实验的过滤条件
         Map<String, String> map = flightDto.getFlight().getFilterMap();
+        // 3、遍历所有实验，当不同层时，判断其过滤条件是否重复。
         for (Flight flight : flights) {
             // 不同层之间要配置检查
             if (!flight.getLayerId().equals(flightDto.getLayerId())) {

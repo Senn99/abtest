@@ -29,7 +29,7 @@ public class RefluxHandler {
     FlowMapper flowMapper;
 
 
-    @Scheduled(fixedRate = 10 * 1000)
+    @Scheduled(fixedRate = 5 * 1000)
     public void refluxTime() {
         log.info("周期回流任务..time: " + LocalDateTime.now());
         // 1、获取状态正常的接口
